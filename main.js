@@ -1,59 +1,59 @@
 const $ = document.querySelector.bind(document);
 const API_BASE = "http://localhost:3000";
 
-const todoForm = $("#todo-form");
-const todoInput = $("#todo-input");
-const submitBtn = $("#submit");
-const taskList = $("#task-list");
+function createTodoApp() {
+    const todoForm = $("#todo-form");
+    const todoInput = $("#todo-input");
+    const taskList = $("#task-list");
 
-const todosLoading = $("#todos-loading");
+    const todosLoading = $("#todos-loading");
 
-// modal
-const modal = $(".modal");
-const modalHeading = $(".modal-heading");
-const cancelBtn = $(".modal-cancel");
-const confirmBtn = $(".modal-confirm");
+    // modal
+    const modal = $(".modal");
+    const modalHeading = $(".modal-heading");
 
-let tasks = []; // lưu lại để đỡ phải gọi API nhiều lần
+    let tasks = []; // lưu lại để đỡ phải gọi API nhiều lần
 
-function escapeHTML(html) {
-    const div = document.createElement("div");
-    div.innerText = html;
-    return div.innerHTML;
-}
+    function escapeHTML(html) {
+        const div = document.createElement("div");
+        div.innerText = html;
+        return div.innerHTML;
+    }
 
-function delay(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-}
+    function delay(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+    }
 
-async function renderTasks() {
-    // if 'tasks' array is empty, try to fetch data
-    if (!tasks.length) {
-        try {
-            // display loading effect
-            todosLoading.classList.add("show");
+    async function renderTasks() {
+        // if 'tasks' array is empty, try to fetch data
+        if (!tasks.length) {
+            try {
+                // display loading effect
+                todosLoading.classList.add("show");
 
-            await delay(1000); // add delay to see loading effect
-            const response = await axios.get(`${API_BASE}/todos`);
-            tasks = response.data;
-        } catch (error) {
-            console.error("Cannot fetch Task List: ", error);
-            taskList.innerHTML = `<li>Cannot fetch Task List!</li>`;
-        } finally {
-            // hide loading effect
-            todosLoading.classList.remove("show");
+                await delay(1000); // add delay to see loading effect
+                const response = await axios.get(`${API_BASE}/todos`);
+                tasks = response.data;
+            } catch (error) {
+                console.error("Cannot fetch Task List: ", error);
+                taskList.innerHTML = `<li>Cannot fetch Task List!</li>`;
+            } finally {
+                // hide loading effect
+                todosLoading.classList.remove("show");
+            }
         }
-    }
 
-    // after fetching data, the 'tasks' array is still empty
-    if (!tasks.length) {
-        taskList.innerHTML = `<li>Your task list is empty!</li>`;
-        return;
-    }
+        // after fetching data, the 'tasks' array is still empty
+        if (!tasks.length) {
+            taskList.innerHTML = `<li>Your task list is empty!</li>`;
+            return;
+        }
 
-    const html = tasks
-        .map((task) => {
-            return `<li class="task-item ${task.completed ? "completed" : ""}" 
+        const html = tasks
+            .map((task) => {
+                return `<li class="task-item ${
+                    task.completed ? "completed" : ""
+                }" 
             data-id="${task.id}">
                     <span class="task-title">${escapeHTML(task.title)}</span>
                     <div class="task-action">
@@ -68,207 +68,230 @@ async function renderTasks() {
                         <button class="task-btn delete">Delete</button>
                     </div>
                 </li>`;
-        })
-        .join("");
-    taskList.innerHTML = html;
-}
-
-// returning 'true' means duplicated
-function checkDuplicated(taskTitle) {
-    return tasks.some(
-        (task) => task.title.toLowerCase() === taskTitle.toLowerCase()
-    );
-}
-
-function checkEmptyOrDuplicated(taskTitle) {
-    // alert if input is empty
-    if (!taskTitle) {
-        alert("Enter a task!");
-        return true;
+            })
+            .join("");
+        taskList.innerHTML = html;
     }
 
-    // prevent duplicate
-    if (checkDuplicated(taskTitle)) {
-        alert(`"${taskTitle}" is already in your task list!`);
-        return true;
+    // returning 'true' means duplicated
+    function checkDuplicated(taskTitle) {
+        return tasks.some(
+            (task) => task.title.toLowerCase() === taskTitle.toLowerCase()
+        );
     }
 
-    return false; // not empty and not duplicated
-}
+    function checkEmptyOrDuplicated(taskTitle) {
+        // alert if input is empty
+        if (!taskTitle) {
+            alert("Enter a task!");
+            return true;
+        }
 
-async function addNewTask(e) {
-    e.preventDefault();
+        // prevent duplicate
+        if (checkDuplicated(taskTitle)) {
+            alert(`"${taskTitle}" is already in your task list!`);
+            return true;
+        }
 
-    const newTaskTitle = todoInput.value.trim();
-
-    if (checkEmptyOrDuplicated(newTaskTitle)) return;
-
-    // new task
-    const newTask = {
-        title: newTaskTitle,
-        completed: false, // default is not complete
-    };
-
-    // add new task to db and tasks list
-    try {
-        const response = await axios.post(`${API_BASE}/todos`, newTask);
-        tasks.unshift(response.data); // không add trực tiếp newTask object vào tasks vì không có id
-
-        // render
-        renderTasks();
-
-        // clear input
-        todoInput.value = "";
-    } catch (error) {
-        console.error(`Cannot add "${newTaskTitle}" task to database: `, error);
-        alert(`Cannot add "${newTaskTitle}" task!`);
+        return false; // not empty and not duplicated
     }
-}
 
-async function handleTaskActions(e) {
-    const taskItem = e.target.closest(".task-item");
-    if (!taskItem) return;
+    async function addNewTask(e) {
+        e.preventDefault();
 
-    const taskId = taskItem.dataset.id; // id property value
-    const taskIndex = tasks.findIndex((task) => task.id === taskId); // index in 'tasks' array
-    const taskTitle = tasks[taskIndex].title;
+        const newTaskTitle = todoInput.value.trim();
 
-    // click EDIT button
-    if (e.target.closest(".task-btn.edit")) {
-        const taskTitleElement = taskItem.querySelector(".task-title");
-        const editBtn = taskItem.querySelector(".task-btn.edit");
+        if (checkEmptyOrDuplicated(newTaskTitle)) return;
 
-        // function to handle user click 'enter'
-        const handleEditInputKeyDown = (e) => {
-            if (e.key === "Enter") editBtn.click();
+        // new task
+        const newTask = {
+            title: newTaskTitle,
+            completed: false, // default is not complete
         };
 
-        // click EDIT button
-        if (e.target.textContent.toLowerCase().includes("edit")) {
-            taskTitleElement.innerHTML = `<input id='edit-input' class="edit-input">`;
-            const editInput = taskItem.querySelector("#edit-input");
-            editInput.value = taskTitle; // assign to initial task title
+        // add new task to db and tasks list
+        try {
+            const response = await axios.post(`${API_BASE}/todos`, newTask);
+            tasks.unshift(response.data); // không add trực tiếp newTask object vào tasks vì không có id
 
-            // change text to 'SAVE'
-            editBtn.textContent = "SAVE";
-            // focus
-            editInput.focus();
+            // render
+            renderTasks();
 
-            // handle user click 'enter'
-            editInput.addEventListener("keydown", handleEditInputKeyDown);
+            // clear input
+            todoInput.value = "";
+        } catch (error) {
+            console.error(
+                `Cannot add "${newTaskTitle}" task to database: `,
+                error
+            );
+            alert(`Cannot add "${newTaskTitle}" task!`);
         }
-        // click SAVE button
-        else {
-            const editInput = taskItem.querySelector("#edit-input");
+    }
 
-            const newTaskTitle = editInput.value.trim();
+    async function handleTaskActions(e) {
+        const taskItem = e.target.closest(".task-item");
+        if (!taskItem) return;
 
-            // check empty or duplicated
-            if (checkEmptyOrDuplicated(newTaskTitle)) {
+        const taskId = taskItem.dataset.id; // id property value
+        const taskIndex = tasks.findIndex((task) => task.id === taskId); // index in 'tasks' array
+        const taskTitle = tasks[taskIndex].title;
+
+        // click EDIT button
+        if (e.target.closest(".task-btn.edit")) {
+            const taskTitleElement = taskItem.querySelector(".task-title");
+            const editBtn = taskItem.querySelector(".task-btn.edit");
+
+            // function to handle user click 'enter'
+            const handleEditInputKeyDown = (e) => {
+                if (e.key === "Enter") editBtn.click();
+            };
+
+            // click EDIT button
+            if (e.target.textContent.toLowerCase().includes("edit")) {
+                taskTitleElement.innerHTML = `<input id='edit-input' class="edit-input">`;
+                const editInput = taskItem.querySelector("#edit-input");
+                editInput.value = taskTitle; // assign to initial task title
+
+                // change text to 'SAVE'
+                editBtn.textContent = "SAVE";
+                // focus
                 editInput.focus();
-                return;
+
+                // handle user click 'enter'
+                editInput.addEventListener("keydown", handleEditInputKeyDown);
             }
+            // click SAVE button
+            else {
+                const editInput = taskItem.querySelector("#edit-input");
 
-            // change text back to 'EDIT'
-            editBtn.textContent = "EDIT";
+                const newTaskTitle = editInput.value.trim();
 
-            // remove input element
-            taskTitleElement.textContent = newTaskTitle;
+                // check empty or duplicated
+                if (checkEmptyOrDuplicated(newTaskTitle)) {
+                    editInput.focus();
+                    return;
+                }
 
-            // remove event listener on editInput element
-            editInput.removeEventListener("keydown", handleEditInputKeyDown);
+                // change text back to 'EDIT'
+                editBtn.textContent = "EDIT";
+
+                // remove input element
+                taskTitleElement.textContent = newTaskTitle;
+
+                // remove event listener on editInput element
+                editInput.removeEventListener(
+                    "keydown",
+                    handleEditInputKeyDown
+                );
+
+                // save to db
+                try {
+                    await axios.patch(`${API_BASE}/todos/${taskId}`, {
+                        title: newTaskTitle,
+                    });
+                } catch (error) {
+                    taskTitleElement.textContent = taskTitle;
+
+                    console.error(
+                        `Cannot update "${newTaskTitle}" task: `,
+                        error
+                    );
+                    alert(`Cannot update "${newTaskTitle}" task!`);
+                    return;
+                }
+
+                // save to 'tasks' array
+                tasks[taskIndex].title = newTaskTitle;
+            }
+        }
+        // click 'mark as done'
+        else if (e.target.closest(".task-btn.done")) {
+            const isComplete = !tasks[taskIndex].completed;
 
             // save to db
             try {
                 await axios.patch(`${API_BASE}/todos/${taskId}`, {
-                    title: newTaskTitle,
+                    completed: isComplete,
                 });
             } catch (error) {
-                taskTitleElement.textContent = taskTitle;
-
-                console.error(`Cannot update "${newTaskTitle}" task: `, error);
-                alert(`Cannot update "${newTaskTitle}" task!`);
+                console.error("Cannot update Complete state: ", error);
+                alert("Cannot update Complete state!");
                 return;
             }
 
-            // save to 'tasks' array
-            tasks[taskIndex].title = newTaskTitle;
+            // save to task list
+            tasks[taskIndex].completed = isComplete;
+
+            renderTasks();
         }
-    }
-    // click 'mark as done'
-    else if (e.target.closest(".task-btn.done")) {
-        const isComplete = !tasks[taskIndex].completed;
+        // click Delete
+        else if (e.target.closest(".task-btn.delete")) {
+            const cleanup = () => {
+                modal.classList.remove("show");
+                modal.removeEventListener("click", handleModalClick);
+            };
 
-        // save to db
-        try {
-            await axios.patch(`${API_BASE}/todos/${taskId}`, {
-                completed: isComplete,
-            });
-        } catch (error) {
-            console.error("Cannot update Complete state: ", error);
-            alert("Cannot update Complete state!");
-            return;
-        }
+            const handleModalClick = async function (e) {
+                // click cancel
+                if (e.target.closest(".modal-cancel")) {
+                    cleanup(); // hide modal and remove event listener
+                }
+                // click confirm
+                else if (e.target.closest(".modal-confirm")) {
+                    cleanup();
 
-        // save to task list
-        tasks[taskIndex].completed = isComplete;
+                    // delete from db
+                    try {
+                        await axios.delete(`${API_BASE}/todos/${taskId}`);
+                    } catch (error) {
+                        console.error(
+                            `Cannot delete "${tasks[taskIndex].title}" task: `,
+                            error
+                        );
+                        alert(
+                            `Cannot delete "${tasks[taskIndex].title}" task!`
+                        );
+                        return;
+                    }
 
-        renderTasks();
-    }
-    // click Delete
-    else if (e.target.closest(".task-btn.delete")) {
-        const cleanup = () => {
-            modal.classList.remove("show");
-            modal.removeEventListener("click", handleModalClick);
-        };
+                    // remove from 'tasks' list
+                    tasks.splice(taskIndex, 1);
 
-        const handleModalClick = async function (e) {
-            // click cancel
-            if (e.target.closest(".modal-cancel")) {
-                cleanup(); // hide modal and remove event listener
-            }
-            // click confirm
-            else if (e.target.closest(".modal-confirm")) {
-                cleanup();
-
-                // delete from db
-                try {
-                    await axios.delete(`${API_BASE}/todos/${taskId}`);
-                } catch (error) {
-                    console.error(
-                        `Cannot delete "${tasks[taskIndex].title}" task: `,
-                        error
-                    );
-                    alert(`Cannot delete "${tasks[taskIndex].title}" task!`);
+                    renderTasks();
+                }
+                // click modal body
+                else if (e.target.closest(".modal-container")) {
                     return;
                 }
+                // click overlay
+                else if (e.target.closest(".modal")) {
+                    cleanup();
+                }
+            };
 
-                // remove from 'tasks' list
-                tasks.splice(taskIndex, 1);
+            // update content
+            modalHeading.textContent = `Do you want to delete "${taskTitle}" task?`;
+            // open modal
+            modal.classList.add("show");
 
-                renderTasks();
-            }
-            // click modal body
-            else if (e.target.closest(".modal-container")) {
-                return;
-            }
-            // click overlay
-            else if (e.target.closest(".modal")) {
-                cleanup();
-            }
-        };
-
-        // update content
-        modalHeading.textContent = `Do you want to delete "${taskTitle}" task?`;
-        // open modal
-        modal.classList.add("show");
-
-        modal.addEventListener("click", handleModalClick);
+            modal.addEventListener("click", handleModalClick);
+        }
     }
+
+    function setupEventListener() {
+        todoForm.addEventListener("submit", addNewTask);
+        taskList.addEventListener("click", handleTaskActions);
+    }
+
+    function init() {
+        setupEventListener();
+        renderTasks();
+    }
+
+    return {
+        init: init,
+    };
 }
 
-todoForm.addEventListener("submit", addNewTask);
-taskList.addEventListener("click", handleTaskActions);
-
-// initialize
-renderTasks();
+const todoApp = createTodoApp();
+todoApp.init();
