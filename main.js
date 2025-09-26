@@ -10,7 +10,6 @@ const todosLoading = $("#todos-loading");
 
 // modal
 const modal = $(".modal");
-const modalContainer = $(".modal-container");
 const modalHeading = $(".modal-heading");
 const cancelBtn = $(".modal-cancel");
 const confirmBtn = $(".modal-confirm");
@@ -148,8 +147,7 @@ async function handleTaskActions(e) {
         if (e.target.textContent.toLowerCase().includes("edit")) {
             taskTitleElement.innerHTML = `<input id='edit-input' class="edit-input">`;
             const editInput = taskItem.querySelector("#edit-input");
-            // gán giá trị input = title ban đầu
-            editInput.value = taskTitle;
+            editInput.value = taskTitle; // assign to initial task title
 
             // change text to 'SAVE'
             editBtn.textContent = "SAVE";
@@ -219,61 +217,19 @@ async function handleTaskActions(e) {
     }
     // click Delete
     else if (e.target.closest(".task-btn.delete")) {
-        // basically work but still have a critical bug:
-        // flow leads to error:
-        /*
-        1. click 'delete' button on a random task item -> cancelBtn, modalContainer, modal and especially confirmBtn have been added an event listener.
-        2. modal opens -> click 'cancel' 
-        3. click 'delete' button again (on the same task item) -> cancelBtn, modalContainer, modal and especially confirmBtn will be added another event listener (TWICE).
-        4. click 'confirm' -> the handler function on confirmBtn will run TWICE that lead to error
-        */
-        // solutions:
-        // 1. use Event handle property (onclick) -> outdated
-        // 2. remove Event listeners of cancelBtn, modalContainer, modal and ESPECIALLY confirmBtn when user cancels 'delete' action.
-        // 3. use event delegation for modal actions
-
-        const handleModalContainerClick = (e) => {
-            e.stopPropagation();
+        const cleanup = () => {
+            modal.classList.remove("show");
+            modal.removeEventListener("click", handleModalClick);
         };
 
-        // update content
-        modalHeading.textContent = `Do you want to delete "${taskTitle}" task?`;
-        // open modal
-        modal.classList.add("show");
-
-        cancelBtn.addEventListener(
-            "click",
-            () => {
-                modal.classList.remove("show");
-            },
-            { once: true }
-        );
-
-        modalContainer.addEventListener("click", handleModalContainerClick);
-
-        modal.addEventListener(
-            "click",
-            () => {
-                modal.classList.remove("show");
-
-                // remove event listener on modalContainer
-                modalContainer.removeEventListener(
-                    "click",
-                    handleModalContainerClick
-                );
-            },
-            { once: true }
-        );
-
-        confirmBtn.addEventListener(
-            "click",
-            async () => {
-                // hide modal
-                modal.classList.remove("show");
-
-                // console.log(tasks);
-                // console.log(tasks[taskIndex]);
-                // console.log(taskIndex);
+        const handleModalClick = async function (e) {
+            // click cancel
+            if (e.target.closest(".modal-cancel")) {
+                cleanup(); // hide modal and remove event listener
+            }
+            // click confirm
+            else if (e.target.closest(".modal-confirm")) {
+                cleanup();
 
                 // delete from db
                 try {
@@ -291,9 +247,23 @@ async function handleTaskActions(e) {
                 tasks.splice(taskIndex, 1);
 
                 renderTasks();
-            },
-            { once: true }
-        );
+            }
+            // click modal body
+            else if (e.target.closest(".modal-container")) {
+                return;
+            }
+            // click overlay
+            else if (e.target.closest(".modal")) {
+                cleanup();
+            }
+        };
+
+        // update content
+        modalHeading.textContent = `Do you want to delete "${taskTitle}" task?`;
+        // open modal
+        modal.classList.add("show");
+
+        modal.addEventListener("click", handleModalClick);
     }
 }
 
