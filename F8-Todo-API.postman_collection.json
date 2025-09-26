@@ -1,0 +1,131 @@
+{
+	"info": {
+		"_postman_id": "c2635e90-ef4e-4826-9db9-cad17c9f13cf",
+		"name": "F8 Todo API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "48572698",
+		"_collection_link": "https://danglhf8-1750442.postman.co/workspace/%C4%90%C4%83ng-L%C3%AA-H%E1%BA%A3i's-Workspace~02adf31d-9a3d-40bb-84f4-cfb602f23713/collection/48572698-c2635e90-ef4e-4826-9db9-cad17c9f13cf?action=share&source=collection_link&creator=48572698"
+	},
+	"item": [
+		{
+			"name": "Todos",
+			"item": [
+				{
+					"name": "Get all tasks",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{API_BASE_URL}}/todos",
+							"host": [
+								"{{API_BASE_URL}}"
+							],
+							"path": [
+								"todos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get task by id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{API_BASE_URL}}/todos/7699",
+							"host": [
+								"{{API_BASE_URL}}"
+							],
+							"path": [
+								"todos",
+								"7699"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create new task",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"Nấu cơm\",\r\n    \"completed\": false\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{API_BASE_URL}}/todos",
+							"host": [
+								"{{API_BASE_URL}}"
+							],
+							"path": [
+								"todos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete task by id",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"Làm bài tập\",\r\n    \"completed\": false\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{API_BASE_URL}}/todos/e2f2",
+							"host": [
+								"{{API_BASE_URL}}"
+							],
+							"path": [
+								"todos",
+								"e2f2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update task by id",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"Rửa bát 123\",\r\n    \"completed\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{API_BASE_URL}}/todos/e3d0",
+							"host": [
+								"{{API_BASE_URL}}"
+							],
+							"path": [
+								"todos",
+								"e3d0"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Todo App</title>
+        <link rel="stylesheet" href="styles.css" />
+    </head>
+    <body>
+        <main>
+            <!-- Page heading -->
+            <h1 class="page-heading">Create your Todo-List</h1>
+
+            <!-- Form -->
+            <form id="todo-form" action="" class="todo-form">
+                <input
+                    type="text"
+                    id="todo-input"
+                    class="input"
+                    placeholder="What are your tasks for today?"
+                    spellcheck="false"
+                />
+                <button
+                    id="submit"
+                    class="submit-btn"
+                    onmousedown="event.preventDefault()"
+                >
+                    Add
+                </button>
+            </form>
+
+            <div id="todos-loading" class="loading-spinner" hidden>
+                <p>🔄 Loading...</p>
+            </div>
+
+            <!-- Task list -->
+            <ul id="task-list" class="task-list">
+                <!-- task item -->
+                <!-- <li class="task-item" data-index="${index}">
+                    <span class="task-title"> Title </span>
+                    <div class="task-action">
+                        <button class="task-btn edit">Edit</button>
+                        <button class="task-btn done">
+                            Mark as done/undone
+                        </button>
+                        <button class="task-btn delete">Delete</button>
+                    </div>
+                </li> -->
+            </ul>
+
+            <!-- modal -->
+            <div class="modal" hidden>
+                <div class="modal-container">
+                    <div class="modal-header">
+                        <p class="modal-heading">Heading</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="modal-cancel modal-btn">No</button>
+                        <button class="modal-confirm modal-btn">Yes</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <!-- axios -->
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+        <script src="main.js"></script>
+    </body>
+</html>
