@@ -219,6 +219,19 @@ async function handleTaskActions(e) {
     }
     // click Delete
     else if (e.target.closest(".task-btn.delete")) {
+        // basically work but still have a critical bug:
+        // flow leads to error:
+        /*
+        1. click 'delete' button on a random task item -> cancelBtn, modalContainer, modal and especially confirmBtn have been added an event listener.
+        2. modal opens -> click 'cancel' 
+        3. click 'delete' button again (on the same task item) -> cancelBtn, modalContainer, modal and especially confirmBtn will be added another event listener (TWICE).
+        4. click 'confirm' -> the handler function on confirmBtn will run TWICE that lead to error
+        */
+        // solutions:
+        // 1. use Event handle property (onclick) -> outdated
+        // 2. remove Event listeners of cancelBtn, modalContainer, modal and ESPECIALLY confirmBtn when user cancels 'delete' action.
+        // 3. use event delegation for modal actions
+
         const handleModalContainerClick = (e) => {
             e.stopPropagation();
         };
